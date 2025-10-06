@@ -23,6 +23,8 @@ import MyProfile from "./Pages/MyProfile";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import AdminRoute from "./Provider/AdminRoute";
 import SellerRoute from "./Provider/SellerRoute";
+import CategoryProduct from "./Pages/CategoryProduct";
+import UpdateProduct from "./Pages/UpdateProduct";
 
 const queryClient = new QueryClient();
 
@@ -45,6 +47,12 @@ const router = createBrowserRouter([
         path: "/product/:id",
         element: <ProductDetails></ProductDetails>,
       },
+      {
+        path: "/category-product/:name",
+        element: <CategoryProduct></CategoryProduct>,
+        loader:({params})=>fetch(`${import.meta.env.VITE_API_URL}/category-product/${params.name}`)
+      },
+      
       {
         path: "/login",
         element: <Login> </Login>,
@@ -76,6 +84,12 @@ const router = createBrowserRouter([
             </SellerRoute>
           </PrivateRoute>
         ),
+        
+      },
+      {
+        path:'/dashboard/my-inventory/update-product/:id',
+        element:<UpdateProduct></UpdateProduct>,
+        loader:({params})=>fetch(`${import.meta.env.VITE_API_URL}/product/${params.id}`)
       },
       {
         path: "my-inventory",

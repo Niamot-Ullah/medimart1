@@ -68,12 +68,12 @@ const Navbar = () => {
               {link}
             </ul>
           </div>
-          <div className='flex'>
+          <NavLink to="/" className='flex'>
                         <img alt='' src={logo} className='w-10 rounded-xl mr-1 md:mr-3'></img>
-                        <NavLink to="/" className=" font-bold text-lg md:text-xl text-green-800  self-center">MediMart</NavLink>
+                        <NavLink  className=" font-bold text-lg md:text-xl text-green-800  self-center">MediMart</NavLink>
                         
 
-                    </div>
+                    </NavLink>
         </div>
         {/* <div className="navbar-center hidden lg:flex">
           <ul className="menu menu-horizontal px-1">
@@ -95,7 +95,7 @@ const Navbar = () => {
                         user ? (
                             <div >
                                 <div className="dropdown">
-  <div tabIndex={0} role="button" className=" m-1 cursor-pointer bg-gray-400 btn"><img alt={user.displayName} className="w-10 rounded-xl" src={user?.photoURL}></img></div>
+  <div tabIndex={0} role="button" className=" m-1 cursor-pointer hover:btn rounded"><img alt={user.displayName} className="w-10 rounded-xl" src={user?.photoURL}></img></div>
   <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-1 w- p-0 shadow-sm">
     <li><Link to='/my-profile'>My Profile</Link></li>
     <li><Link to='/dashboard'>Dashboard</Link></li>

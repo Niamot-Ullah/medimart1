@@ -1,54 +1,37 @@
-import axios from "axios";
 import React from "react";
-import { imageUpload } from "../api/utils";
-import toast from "react-hot-toast";
+import { Navigate, useLoaderData, useNavigate } from "react-router";
 import useAuth from "../Hooks/useAuth";
-import { useNavigate } from "react-router";
+import toast from "react-hot-toast";
 
-const AddProduct = () => {
-  const {user} = useAuth()
+const UpdateProduct = () => {
+  const data = useLoaderData();
   const navigate = useNavigate()
-  const handleAddProduct = async (e) => {
+  const { user } = useAuth();
+  const { _id, name, price, category, quantity, description, imageUrl } = data;
+  //update data
+  const handleUpdate = (e) => {
     e.preventDefault();
-    const form = e.target;
-    const name = form.name.value;
-    const category = form.category.value;
-    const description = form.description.value;
-    const price = form.price.value;
-    const quantity = form.quantity.value;
-    // Handle image upload
-    const image = form.image.files[0];
-    
-try{
-    const imageUrl = await imageUpload(image);
-    // console.log(imageUrl);
-    const productData = {
-      name,
-      category,
-      description,
-      price: parseFloat(price),
-      quantity: parseInt(quantity),
-      imageUrl,
-      seller:{
-        name: user?.displayName,
-        email: user?.email,
-        image: user?.photoURL,
-      }
-    };
-// send product data to the server
-const {data} = await axios.post(`${import.meta.env.VITE_API_URL}/add-product`, productData);
-console.log(data);
-toast.success("Product added successfully!");
-form.reset()
-navigate('/dashboard/my-inventory')
-}catch(err){
-console.log(err);
-toast.error("Failed to add product",err.code);
-}
+    const form = new FormData(e.target);
+    const data = Object.fromEntries(form);
+
+    fetch(`${import.meta.env.VITE_API_URL}/update-product/${_id}`, {
+      method: "PUT",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify(data),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data);
+      });
+      toast.success('Medicine updated Successfully')
+      navigate('/dashboard/my-inventory')
   };
+
   return (
     <div className="w-full min-h-[calc(100vh-40px)] flex flex-col justify-center items-center text-gray-800 rounded-xl bg-gray-50">
-      <form onSubmit={handleAddProduct}>
+      <form onSubmit={handleUpdate}>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
           <div className="space-y-6">
             {/* Name */}
@@ -61,8 +44,8 @@ toast.error("Failed to add product",err.code);
                 name="name"
                 id="name"
                 type="text"
-                placeholder="Medicine Name"
                 required
+                defaultValue={name}
               />
             </div>
             {/* Category */}
@@ -74,8 +57,9 @@ toast.error("Failed to add product",err.code);
                 required
                 className="w-full px-4 py-3 border-lime-300 focus:outline-lime-500 rounded-md bg-white"
                 name="category"
+                defaultValue={category}
               >
-                <option value="Tablet">Tablet</option>
+               <option value="Tablet">Tablet</option>
                 <option value="Capsule">Capsule</option>
                 <option value="Syrup">Syrup</option>
                 <option value="Injection">Injection</option>
@@ -103,6 +87,7 @@ toast.error("Failed to add product",err.code);
                 placeholder="Write medicine description here..."
                 className="block rounded-md focus:lime-300 w-full h-32 px-4 py-3 text-gray-800  border border-lime-300 bg-white focus:outline-lime-500 "
                 name="description"
+                defaultValue={description}
               ></textarea>
             </div>
           </div>
@@ -121,6 +106,7 @@ toast.error("Failed to add product",err.code);
                   type="number"
                   placeholder="Price per unit"
                   required
+                  defaultValue={price}
                 />
               </div>
 
@@ -136,6 +122,7 @@ toast.error("Failed to add product",err.code);
                   type="number"
                   placeholder="Available quantity"
                   required
+                  defaultValue={quantity}
                 />
               </div>
             </div>
@@ -165,7 +152,7 @@ toast.error("Failed to add product",err.code);
               type="submit"
               className="w-full p-3 mt-5 text-center font-medium text-white transition duration-200 rounded shadow-md bg-lime-500 cursor-pointer hover:bg-lime-600"
             >
-              Save & Continue
+              Update Now
             </button>
           </div>
         </div>
@@ -174,4 +161,4 @@ toast.error("Failed to add product",err.code);
   );
 };
 
-export default AddProduct;
+export default UpdateProduct;

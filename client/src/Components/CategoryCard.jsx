@@ -1,8 +1,10 @@
 import React from 'react';
+import { Link } from 'react-router';
 
 const CategoryCard = ({category}) => {
     return (
-        <div className="card bg-base-100 w-96 shadow-sm">
+        <div>
+          {/* <Link to={`/category-product/${category.name}`} className="card bg-base-100 w-96 shadow-sm">
   <figure>
     <img
       src={category.image}
@@ -14,7 +16,8 @@ const CategoryCard = ({category}) => {
     <p>{category.medicineCount} medicines</p>
     
   </div>
-</div>
+</Link> */}
+        </div>
     );
 };
 

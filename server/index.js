@@ -26,13 +26,20 @@ async function run() {
   const ordersCollection = database.collection("orders");
   const usersCollection = database.collection("users");
   try {
-
-    // Get all categories of products
+    // Get all categories 
     app.get("/categories", async (req, res) => {
       const result = await categoryCollection.find({}).toArray();
       res.send(result);
     });
-    // Get all products/medicine
+    //get category based products by name
+    app.get("/category-product/:name", async (req, res) => {
+      const name = req.params.name;
+      // console.log(name); 
+      const result = await productCollection.find({category: name}).toArray();
+      // console.log(result);
+      res.send(result);
+    });
+    // Get all products/medicine for shop
     app.get("/products", async (req, res) => {
       const result = await productCollection.find().toArray();
       res.send(result);
@@ -86,43 +93,47 @@ async function run() {
     });
 
     //get data for admin statistics
-    app.get('/admin-statistics',async(req,res)=>{
-      const totalUser = await usersCollection.estimatedDocumentCount()
-      const totalProduct = await productCollection.estimatedDocumentCount()
-      const totalOrders = await ordersCollection.estimatedDocumentCount()
+    app.get("/admin-statistics", async (req, res) => {
+      const totalUser = await usersCollection.estimatedDocumentCount();
+      const totalProduct = await productCollection.estimatedDocumentCount();
+      const totalOrders = await ordersCollection.estimatedDocumentCount();
       //mongodb aggregation
-      const result = await ordersCollection.aggregate([
-        {
-          $addFields:{
-            createdAt:{$toDate:'$_id'},
-          },
-        },
-        {
-          $group:{
-            _id: {
-              $dateToString:{
-                format:"%Y-%m-%d",
-                date: '$createdAt'
-              }
+      const result = await ordersCollection
+        .aggregate([
+          {
+            $addFields: {
+              createdAt: { $toDate: "$_id" },
             },
-            revenue: {$sum:'$price'},
-            order:{ $sum:1}
-          }
-        }
-      ]).toArray()
+          },
+          {
+            $group: {
+              _id: {
+                $dateToString: {
+                  format: "%Y-%m-%d",
+                  date: "$createdAt",
+                },
+              },
+              revenue: { $sum: "$price" },
+              order: { $sum: 1 },
+            },
+          },
+        ])
+        .toArray();
 
-      const chartData = result.map(data=>(
-        {
-        date:data._id,
-        totalRevenue:data.revenue,
-        order:data.order
-      }
-      ))
-      const totalRevenue = result.reduce((sum,data) => sum + data?.revenue ,0)
-      res.send({chartData,totalUser,totalProduct,totalOrders,totalRevenue})
-
-    })
-
+      const chartData = result.map((data) => ({
+        date: data._id,
+        totalRevenue: data.revenue,
+        order: data.order,
+      }));
+      const totalRevenue = result.reduce((sum, data) => sum + data?.revenue, 0);
+      res.send({
+        chartData,
+        totalUser,
+        totalProduct,
+        totalOrders,
+        totalRevenue,
+      });
+    });
 
     // Add a new product/medicine
     app.post("/add-product", async (req, res) => {
@@ -150,7 +161,7 @@ async function run() {
       res.send({ clientSecret: client_secret });
     });
 
-    //save order data in orders collection in db
+    //save order data in db
     app.post("/order", async (req, res) => {
       const orderData = req.body;
       const result = await ordersCollection.insertOne(orderData);
@@ -158,20 +169,19 @@ async function run() {
     });
 
     // get order info for users
-    app.get('/orders/user/:email',async(req,res)=>{
-      const email = req.params.email
-      const filter = {'customer.email': email}
-      const result = await ordersCollection.find(filter).toArray()
-      res.send(result)
-    })
+    app.get("/orders/user/:email", async (req, res) => {
+      const email = req.params.email;
+      const filter = { "customer.email": email };
+      const result = await ordersCollection.find(filter).toArray();
+      res.send(result);
+    });
     // get order info for users
-    app.get('/orders/seller/:email',async(req,res)=>{
-      const email = req.params.email
-      const filter = {'seller.email': email}
-      const result = await productCollection.find(filter).toArray()
-      res.send(result)
-    })
-
+    app.get("/orders/seller/:email", async (req, res) => {
+      const email = req.params.email;
+      const filter = { "seller.email": email };
+      const result = await productCollection.find(filter).toArray();
+      res.send(result);
+    });
 
     // update medicine quantity (increase or decrease)
     app.patch("/update-quantity/:id", async (req, res) => {
@@ -187,6 +197,26 @@ async function run() {
       const result = await productCollection.updateOne(filter, updateDoc);
       res.send(result);
     });
+    // delete a product
+    app.delete('/product/:id', async(req,res)=>{
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)};
+      const result = await productCollection.deleteOne(query);
+      res.send(result); 
+    })
+
+    
+    //update product 
+    app.put('/update-product/:id', async(req,res)=>{
+      const id = req.params.id;
+      const productData = req.body;
+      const query = {_id: new ObjectId(id)}
+      const updatedDoc = {
+        $set: productData
+      }
+      const result = await productCollection.updateOne(query, updatedDoc);
+      res.send(result);
+    })
 
     //save or update a users info in db
     app.post("/user", async (req, res) => {
