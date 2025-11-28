@@ -52,6 +52,11 @@ async function run() {
       });
       res.send(result);
     });
+    //get data for featured products
+    app.get('/featured-products', async(req,res)=>{
+      const result = await productCollection.find().sort({ _id: -1 }).limit(10).toArray();
+      res.send(result);
+    })
 
     //get user role
     app.get("/user/role/:email", async (req, res) => {

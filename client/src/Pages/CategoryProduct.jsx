@@ -14,7 +14,7 @@ const CategoryProduct = () => {
   const { name } = useParams();
   return (
     <div className="bg-gray-50  pt-12 pb-20">
-      <div className=" w-11/12 md:w-10/12 mx-auto ">
+      <div className=" max-w-6xl mx-auto px-4 ">
       <Searchbar sortOption={sortOption} setSortOption={setSortOption} searchTerm={searchTerm} setSearchTerm={setSearchTerm} productData={productData} setProductData={setProductData} data={data} />
       <h1 className="text-3xl font-bold text-center my-6">{name}</h1>
 
